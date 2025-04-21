@@ -1,6 +1,8 @@
+import DefaultLayout from "@/layouts/DefaultLayout";
+import HomePage from "@/pages/HomePage";
+import ReleasePage from "@/pages/ReleasePage";
+import RepositoryPage from "@/pages/RepositoryPage";
 import { useRoutes } from "react-router-dom";
-import DefaultLayout from "../layouts/DefaultLayout";
-import HomePage from "../pages/HomePage";
 
 const AppRouter = () => {
     const routes = useRoutes([
@@ -12,10 +14,14 @@ const AppRouter = () => {
                     path: "",
                     element: <HomePage />,
                 },
-                // {
-                //     path: "explorer",
-                //     element: <ExplorerPage />,
-                // },
+                {
+                    path: "repositories",
+                    element: <RepositoryPage />,
+                },
+                {
+                    path: "releases",
+                    element: <ReleasePage />,
+                },
             ],
         },
     ]);
