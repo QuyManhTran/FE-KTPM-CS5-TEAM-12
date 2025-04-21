@@ -6,29 +6,15 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useEffect, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import useRelease from "@/hooks/useRelease";
-import { Release } from "@/types/release";
-
-const ReleasePage = () => {
-    const navigate = useNavigate();
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import useCommit from "@/hooks/useCommit";
+import newTab from "@/assets/icons8-new-tab.svg";
+const CommitPage = () => {
     const { state } = useLocation();
-    const { currentPage, meta, data, loading, setCurrentPage, setRepoId } =
-        useRelease();
-
-    const onNavigateToCommits = (release: Release) => {
-        navigate(
-            `/repositories/${state.repo.user}/${state.repo.name}/${release.tag}/commits`,
-            {
-                state: {
-                    repo: state.repo,
-                    release: release,
-                },
-            }
-        );
-    };
-
+    const { currentPage, meta, data, loading, setCurrentPage, setReleaseId } =
+        useCommit();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
     const pages = useMemo(() => {
         if (meta && meta.totalPage <= 5)
             return Array.from({ length: meta.totalPage }, (_, i) => i + 1);
@@ -51,18 +37,18 @@ const ReleasePage = () => {
     }, [currentPage, meta]);
 
     useEffect(() => {
-        if (state && state.repo) {
-            setRepoId(state.repo.id);
+        if (state && state.release) {
+            setReleaseId(state.release.id);
         }
-    }, [setRepoId, state]);
+    }, [setReleaseId, state]);
 
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-row items-center justify-between">
                 <div className="flex-1">
-                    <h2 className="text-[40px] font-extralight">Releases</h2>
+                    <h2 className="text-[40px] font-extralight">Commits</h2>
                 </div>
-                {data.length > 0 && !loading && (
+                {data.length > 0 && (
                     <div>
                         <Pagination>
                             <PaginationContent>
@@ -114,7 +100,6 @@ const ReleasePage = () => {
                     </div>
                 )}
             </div>
-
             <div className="bg-[#fafafa] px-4 py-4 rounded-2xl">
                 <h2 className="text-[24px] font-light">
                     Repo:{" "}
@@ -126,55 +111,104 @@ const ReleasePage = () => {
                         {state.repo.user + "/" + state.repo.name}
                     </a>
                 </h2>
-                {!data.length && !loading && (
-                    <p className="text-center my-6">There isn't no Releases</p>
-                )}
+                <h2 className="text-[24px] font-light">
+                    Tags:{" "}
+                    <a
+                        href={`https://github.com/${state.repo.user}/${state.repo.name}/releases/tag/${state.release.tag}`}
+                        target="_blank"
+                        className="text-blue-500"
+                    >
+                        {state.release.tag}
+                    </a>
+                </h2>
+                <p className={isOpen ? "" : "line-clamp-3"}>
+                    Content: {state.release.content}
+                </p>
+                <span
+                    className="text-red-400 cursor-pointer"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    {isOpen ? "See less" : "See more"}
+                </span>
             </div>
-
             <div className="grid grid-cols-2 gap-9 mb-6">
                 <div>
                     {data
                         .filter((_, index) => index < data.length / 2)
-                        .map((release, index) => (
+                        .map((commit, index) => (
                             <div
-                                className="py-4 px-4 border border-[#ddd] bg-white flex flex-row justify-between cursor-pointer hover:bg-[#f5f5f5]"
+                                className="py-4 px-4 border border-[#ddd] bg-white flex flex-col hover:bg-[#f5f5f5]"
                                 key={index}
-                                onClick={() => onNavigateToCommits(release)}
                             >
-                                <span>
-                                    {(currentPage - 1) *
-                                        (meta?.pageSize as number) +
-                                        index +
-                                        1 +
-                                        ". " +
-                                        release.tag}
-                                </span>
+                                <div className="flex flex-1 justify-between items-center">
+                                    <span>
+                                        {(currentPage - 1) *
+                                            (meta?.pageSize as number) +
+                                            index +
+                                            1 +
+                                            ". " +
+                                            commit.hash}
+                                    </span>
+                                    <a
+                                        href={`https://github.com/${state.repo.user}/${state.repo.name}/commit/${commit.hash}`}
+                                        className="text-blue-500 flex items-center gap-2"
+                                        target="_blank"
+                                    >
+                                        View Github{" "}
+                                        <img
+                                            src={newTab}
+                                            className="h-6 w-6 text-blue-500"
+                                        ></img>
+                                    </a>
+                                </div>
+                                <p className="line-clamp-1 mt-2">
+                                    Message: {commit.message}
+                                </p>
                             </div>
                         ))}
                 </div>
                 <div>
                     {data
                         .filter((_, index) => index >= data.length / 2)
-                        .map((release, index) => (
+                        .map((commit, index) => (
                             <div
-                                className="py-4 px-4 border border-[#ddd] bg-white flex flex-row justify-between cursor-pointer hover:bg-[#f5f5f5]"
+                                className="py-4 px-4 border border-[#ddd] bg-white flex flex-col hover:bg-[#f5f5f5]"
                                 key={index}
-                                onClick={() => onNavigateToCommits(release)}
                             >
-                                <span>
-                                    {(currentPage - 1) *
-                                        (meta?.pageSize as number) +
-                                        Math.ceil(data.length / 2) +
-                                        index +
-                                        1 +
-                                        ". " +
-                                        release.tag}
-                                </span>
+                                <div className="flex flex-1 justify-between items-center">
+                                    <span>
+                                        {" "}
+                                        {(currentPage - 1) *
+                                            (meta?.pageSize as number) +
+                                            Math.ceil(data.length / 2) +
+                                            index +
+                                            1 +
+                                            ". " +
+                                            commit.hash}{" "}
+                                    </span>
+                                    <a
+                                        href={`https://github.com/${state.repo.user}/${state.repo.name}/commit/${commit.hash}`}
+                                        className="text-blue-500 flex items-center gap-2"
+                                        target="_blank"
+                                    >
+                                        View Github{" "}
+                                        <img
+                                            src={newTab}
+                                            className="h-6 w-6 text-blue-500"
+                                        ></img>
+                                    </a>
+                                </div>
+                                <p className="line-clamp-1 mt-2">
+                                    Message: {commit.message}
+                                </p>
                             </div>
                         ))}
                 </div>
             </div>
-            {data.length > 0 && !loading && (
+            {!data.length && !loading && (
+                <p className="text-center">There isn't any commits </p>
+            )}
+            {data.length > 0 && (
                 <div className="mb-6">
                     <Pagination>
                         <PaginationContent>
@@ -229,4 +263,4 @@ const ReleasePage = () => {
     );
 };
 
-export default ReleasePage;
+export default CommitPage;

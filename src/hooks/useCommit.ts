@@ -1,19 +1,22 @@
-import { getReleasesByRepoId } from "@/services";
+import { getCommitsByReleaseId } from "@/services";
+import { Commit } from "@/types/commit";
 import { Metadata } from "@/types/pagination";
-import { Release } from "@/types/release";
 import { useCallback, useEffect, useState } from "react";
 
-const useRelease = () => {
+const useCommit = () => {
     const [meta, setMeta] = useState<Metadata | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [data, setData] = useState<Release[]>([]);
-    const [repoId, setRepoId] = useState<number>(0);
+    const [data, setData] = useState<Commit[]>([]);
+    const [releaseId, setReleaseId] = useState<number>(0);
 
     const fetchRepositories = useCallback(async () => {
         try {
             setLoading(true);
-            const { data } = await getReleasesByRepoId(repoId, currentPage);
+            const { data } = await getCommitsByReleaseId(
+                releaseId,
+                currentPage
+            );
             if (data.status === "success" && data.data) {
                 setMeta(data.data?.meta);
                 setData(data.data.data);
@@ -23,15 +26,15 @@ const useRelease = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, repoId]);
+    }, [currentPage, releaseId]);
 
     useEffect(() => {
-        if (repoId) {
+        if (releaseId) {
             fetchRepositories();
         }
-    }, [repoId, currentPage, fetchRepositories]);
+    }, [releaseId, currentPage, fetchRepositories]);
 
-    return { loading, meta, data, currentPage, setCurrentPage, setRepoId };
+    return { loading, meta, data, currentPage, setCurrentPage, setReleaseId };
 };
 
-export default useRelease;
+export default useCommit;

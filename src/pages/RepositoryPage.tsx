@@ -9,9 +9,19 @@ import {
 import useRepository from "@/hooks/useRepositoy";
 import { useMemo } from "react";
 import star from "@/assets/star.png";
+import { Repository } from "@/types/repo";
+import { useNavigate } from "react-router-dom";
 
 const RepositoryPage = () => {
+    const navigate = useNavigate();
     const { currentPage, meta, data, setCurrentPage } = useRepository();
+    const onNavigateToRelease = (repo: Repository) => {
+        navigate(`/repositories/${repo.user}/${repo.name}/releases`, {
+            state: {
+                repo: repo,
+            },
+        });
+    };
 
     const pages = useMemo(() => {
         if (meta && meta.totalPage <= 5)
@@ -92,7 +102,7 @@ const RepositoryPage = () => {
                     </Pagination>
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-9">
+            <div className="grid grid-cols-2 gap-9 mb-6">
                 <div>
                     {data
                         .filter((_, index) => index < data.length / 2)
@@ -100,6 +110,7 @@ const RepositoryPage = () => {
                             <div
                                 className="py-4 px-4 border border-[#ddd] bg-white flex flex-row justify-between cursor-pointer hover:bg-[#f5f5f5]"
                                 key={index}
+                                onClick={() => onNavigateToRelease(repo)}
                             >
                                 <span>
                                     {(currentPage - 1) *
@@ -125,11 +136,12 @@ const RepositoryPage = () => {
                             <div
                                 className="py-4 px-4 border border-[#ddd] bg-white flex flex-row justify-between cursor-pointer hover:bg-[#f5f5f5]"
                                 key={index}
+                                onClick={() => onNavigateToRelease(repo)}
                             >
                                 <span>
                                     {(currentPage - 1) *
                                         (meta?.pageSize as number) +
-                                        Math.floor(data.length / 2) +
+                                        Math.ceil(data.length / 2) +
                                         index +
                                         1 +
                                         ". " +
@@ -144,6 +156,52 @@ const RepositoryPage = () => {
                             </div>
                         ))}
                 </div>
+            </div>
+
+            <div className="mb-6">
+                <Pagination>
+                    <PaginationContent>
+                        <PaginationItem
+                            className={`${
+                                currentPage === 1 ? "pointer-events-none" : ""
+                            }`}
+                            onClick={() => {
+                                if (currentPage > 1) {
+                                    setCurrentPage(currentPage - 1);
+                                }
+                            }}
+                        >
+                            <PaginationPrevious />
+                        </PaginationItem>
+                        {pages.map((page) => (
+                            <PaginationItem
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                            >
+                                <PaginationLink isActive={currentPage === page}>
+                                    {page}
+                                </PaginationLink>
+                            </PaginationItem>
+                        ))}
+                        <PaginationItem
+                            className={`${
+                                currentPage === meta?.totalPage
+                                    ? "pointer-events-none"
+                                    : ""
+                            }`}
+                            onClick={() => {
+                                if (
+                                    meta?.totalPage &&
+                                    currentPage < meta?.totalPage
+                                ) {
+                                    setCurrentPage(currentPage + 1);
+                                }
+                            }}
+                        >
+                            <PaginationNext />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
             </div>
         </div>
     );

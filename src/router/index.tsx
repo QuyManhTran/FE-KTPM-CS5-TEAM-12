@@ -1,4 +1,5 @@
 import DefaultLayout from "@/layouts/DefaultLayout";
+import CommitPage from "@/pages/CommitPage";
 import HomePage from "@/pages/HomePage";
 import ReleasePage from "@/pages/ReleasePage";
 import RepositoryPage from "@/pages/RepositoryPage";
@@ -19,8 +20,12 @@ const AppRouter = () => {
                     element: <RepositoryPage />,
                 },
                 {
-                    path: "releases",
+                    path: "repositories/:user/:name/releases",
                     element: <ReleasePage />,
+                },
+                {
+                    path: "repositories/:user/:name/:tag/commits",
+                    element: <CommitPage />,
                 },
             ],
         },
