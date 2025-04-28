@@ -127,9 +127,7 @@ const ReleasePage = () => {
                     </a>
                 </h2>
                 {!data.length && !loading && (
-                    <p className="text-center my-6">
-                        There isn't anys Releases
-                    </p>
+                    <p className="text-center my-6">There isn't any Releases</p>
                 )}
             </div>
 
